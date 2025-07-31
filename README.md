@@ -71,9 +71,6 @@ nvm alias default 22
    npm run dev
    ```
 
-4. **Open your browser**
-   Navigate to `http://localhost:5173`
-
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -85,24 +82,9 @@ nvm alias default 22
 
 This project includes a Netlify function for generating sample todo items. To test the function locally:
 
-### Option 1: Netlify CLI (Recommended)
-
-1. **Install Netlify CLI globally**
-
-   ```bash
-   npm install -g netlify-cli
-   ```
-
-2. **Start the development server with functions**
-
-   ```bash
-   netlify dev
-   ```
-
-3. **Test the function**
-   - Navigate to `/test-function` in your browser
-   - Click "Test Generate List Items" button
-   - The function will be available at `http://localhost:8888/.netlify/functions/generate-list-items`
+- Navigate to `/test-function` in your browser
+- Click "Test Generate List Items" button
+- The function is available at `http://localhost:8888/.netlify/functions/generate-list-items`
 
 ## Project Structure
 
