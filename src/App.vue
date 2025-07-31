@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router';
 import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
 import { useRoute } from 'vue-router';
+import KeyboardShortcutsHelp from './components/KeyboardShortcutsHelp.vue';
 
 const route = useRoute();
 const { registerShortcut } = useKeyboardShortcuts();
@@ -127,6 +128,16 @@ const setupGlobalShortcuts = (): void => {
     },
     description: 'Cancel current action'
   });
+
+  // Help shortcut (?) - works globally
+  registerShortcut({
+    shortcut: { key: '?' },
+    handler: () => {
+      const event = new CustomEvent('toggle-shortcuts-help');
+      document.dispatchEvent(event);
+    },
+    description: 'Toggle keyboard shortcuts help'
+  });
 };
 
 // Initialize shortcuts
@@ -155,6 +166,9 @@ setupGlobalShortcuts();
         <RouterView />
       </div>
     </main>
+    
+    <!-- Keyboard shortcuts help -->
+    <KeyboardShortcutsHelp />
   </div>
 </template>
 

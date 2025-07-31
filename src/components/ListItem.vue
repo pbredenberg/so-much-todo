@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useListItemsStore } from '../stores';
 import type { ListItem } from '../stores';
 
@@ -55,6 +55,13 @@ const handleCancelAction = (): void => {
   }
 };
 
+const ariaLabel = computed(() => {
+  const baseLabel = `Todo item: ${props.item.name}`;
+  const completedLabel = props.item.isComplete ? ' (completed)' : '';
+  const selectedLabel = props.isSelected ? ' (selected)' : '';
+  return baseLabel + completedLabel + selectedLabel;
+});
+
 onMounted(() => {
   document.addEventListener(
     'start-edit-item',
@@ -76,6 +83,11 @@ onUnmounted(() => {
   <div
     class="list-item"
     :class="{ completed: item.isComplete, selected: isSelected }"
+    :data-item-id="item.id"
+    :aria-selected="isSelected"
+    :aria-label="ariaLabel"
+    role="option"
+    tabindex="-1"
   >
     <div class="item-content">
       <div class="item-checkbox">

@@ -88,11 +88,37 @@ const getSelectedItem = () => {
 };
 
 const handleSelectNextItem = (): void => {
-  selectNextItem();
+  const currentItems = items.value;
+  if (currentItems.length === 0) {
+    return;
+  }
+  
+  // If no item selected, select first item
+  if (selectedItemIndex.value === -1) {
+    selectedItemIndex.value = 0;
+  } else {
+    selectNextItem();
+  }
+  
+  // Scroll selected item into view
+  scrollToSelectedItem();
 };
 
 const handleSelectPreviousItem = (): void => {
-  selectPreviousItem();
+  const currentItems = items.value;
+  if (currentItems.length === 0) {
+    return;
+  }
+  
+  // If no item selected, select last item
+  if (selectedItemIndex.value === -1) {
+    selectedItemIndex.value = currentItems.length - 1;
+  } else {
+    selectPreviousItem();
+  }
+  
+  // Scroll selected item into view
+  scrollToSelectedItem();
 };
 
 const handleEditSelectedItem = (): void => {
@@ -128,6 +154,24 @@ const handleCancelCurrentAction = (): void => {
   clearSelection();
   const event = new CustomEvent('cancel-action-trigger');
   document.dispatchEvent(event);
+};
+
+const scrollToSelectedItem = (): void => {
+  if (selectedItemIndex.value >= 0) {
+    const selectedItem = getSelectedItem();
+    if (selectedItem) {
+      // Find the DOM element for the selected item
+      setTimeout(() => {
+        const itemElement = document.querySelector(`[data-item-id="${selectedItem.id}"]`);
+        if (itemElement) {
+          itemElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          });
+        }
+      }, 50);
+    }
+  }
 };
 
 onMounted(() => {
@@ -190,14 +234,28 @@ defineExpose({
     <AddListItem :listId="listId" />
 
     <div class="items-section">
-      <h3>Items ({{ items.length }})</h3>
+      <div class="items-header">
+        <h3>Items ({{ items.length }})</h3>
+        <div v-if="items.length > 0" class="keyboard-hints">
+          <span class="hint">Use ↑↓ to navigate</span>
+          <span class="hint">Enter to edit</span>
+          <span class="hint">? for shortcuts</span>
+        </div>
+      </div>
 
-      <div v-if="items.length > 0" class="items-list">
+      <div 
+        v-if="items.length > 0" 
+        class="items-list"
+        role="listbox"
+        :aria-label="`Todo items for ${list.name}`"
+        aria-multiselectable="false"
+      >
         <ListItem 
           v-for="(item, index) in items" 
           :key="item.id" 
           :item="item" 
           :isSelected="selectedItemId === item.id"
+          :data-item-id="item.id"
           @click="selectItem(index)"
         />
       </div>
@@ -272,13 +330,39 @@ defineExpose({
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.items-section h3 {
-  margin: 0 0 1.5rem 0;
-  color: #333;
-  font-size: 1.5rem;
+.items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.items-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.keyboard-hints {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hint {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .items-list {
+  outline: none;
   display: flex;
   flex-direction: column;
   gap: 1rem;
