@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useListsStore, useListItemsStore } from '../stores';
 import ListItem from './ListItem.vue';
@@ -14,6 +14,16 @@ const listId = route.params.id as string;
 
 const list = computed(() => listsStore.getListById(listId));
 const items = computed(() => listItemsStore.getItemsByListId(listId));
+
+// Item selection state for keyboard navigation
+const selectedItemIndex = ref<number>(-1);
+const selectedItemId = computed(() => {
+  const currentItems = items.value;
+  if (selectedItemIndex.value >= 0 && selectedItemIndex.value < currentItems.length) {
+    return currentItems[selectedItemIndex.value].id;
+  }
+  return null;
+});
 
 const navigateBack = () => {
   router.push('/');
@@ -33,10 +43,62 @@ const deleteList = () => {
   }
 };
 
+// Item selection methods
+const selectItem = (index: number): void => {
+  const currentItems = items.value;
+  if (index >= 0 && index < currentItems.length) {
+    selectedItemIndex.value = index;
+  }
+};
+
+const selectNextItem = (): void => {
+  const currentItems = items.value;
+  if (currentItems.length === 0) {
+    return;
+  }
+  
+  const nextIndex = selectedItemIndex.value + 1;
+  if (nextIndex < currentItems.length) {
+    selectedItemIndex.value = nextIndex;
+  }
+};
+
+const selectPreviousItem = (): void => {
+  const currentItems = items.value;
+  if (currentItems.length === 0) {
+    return;
+  }
+  
+  const prevIndex = selectedItemIndex.value - 1;
+  if (prevIndex >= 0) {
+    selectedItemIndex.value = prevIndex;
+  }
+};
+
+const clearSelection = (): void => {
+  selectedItemIndex.value = -1;
+};
+
+const getSelectedItem = () => {
+  const currentItems = items.value;
+  if (selectedItemIndex.value >= 0 && selectedItemIndex.value < currentItems.length) {
+    return currentItems[selectedItemIndex.value];
+  }
+  return null;
+};
+
 onMounted(() => {
   if (!list.value) {
     router.push('/');
   }
+});
+
+// Export methods for keyboard shortcuts (Phase 2)
+defineExpose({
+  selectNextItem,
+  selectPreviousItem,
+  clearSelection,
+  getSelectedItem,
 });
 </script>
 
@@ -67,7 +129,13 @@ onMounted(() => {
       <h3>Items ({{ items.length }})</h3>
 
       <div v-if="items.length > 0" class="items-list">
-        <ListItem v-for="item in items" :key="item.id" :item="item" />
+        <ListItem 
+          v-for="(item, index) in items" 
+          :key="item.id" 
+          :item="item" 
+          :isSelected="selectedItemId === item.id"
+          @click="selectItem(index)"
+        />
       </div>
 
       <div v-else class="empty-items">

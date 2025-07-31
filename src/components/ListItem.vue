@@ -5,6 +5,7 @@ import type { ListItem } from '../stores';
 
 const props = defineProps<{
   item: ListItem;
+  isSelected?: boolean;
 }>();
 
 const listItemsStore = useListItemsStore();
@@ -43,7 +44,7 @@ const deleteItem = () => {
 </script>
 
 <template>
-  <div class="list-item" :class="{ completed: item.isComplete }">
+  <div class="list-item" :class="{ completed: item.isComplete, selected: isSelected }">
     <div class="item-content">
       <div class="item-checkbox">
         <input
@@ -113,6 +114,12 @@ const deleteItem = () => {
 .list-item.completed .item-name {
   text-decoration: line-through;
   color: #666;
+}
+
+.list-item.selected {
+  border-color: #667eea;
+  background: #f8f9ff;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .item-content {
