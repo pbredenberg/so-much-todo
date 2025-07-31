@@ -11,6 +11,9 @@ import { RouterView } from 'vue-router';
           <nav class="header-nav">
             <RouterLink to="/" class="nav-link">Home</RouterLink>
             <RouterLink to="/profile" class="nav-link">Profile</RouterLink>
+            <RouterLink to="/test-function" class="nav-link"
+              >Test API</RouterLink
+            >
           </nav>
         </div>
       </div>

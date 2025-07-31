@@ -81,6 +81,29 @@ nvm alias default 22
 - `npm run preview` - Preview production build
 - `npm run lint` - Run linting (if configured)
 
+## Netlify Functions
+
+This project includes a Netlify function for generating sample todo items. To test the function locally:
+
+### Option 1: Netlify CLI (Recommended)
+
+1. **Install Netlify CLI globally**
+
+   ```bash
+   npm install -g netlify-cli
+   ```
+
+2. **Start the development server with functions**
+
+   ```bash
+   netlify dev
+   ```
+
+3. **Test the function**
+   - Navigate to `/test-function` in your browser
+   - Click "Test Generate List Items" button
+   - The function will be available at `http://localhost:8888/.netlify/functions/generate-list-items`
+
 ## Project Structure
 
 ```dir
@@ -91,6 +114,7 @@ src/
 │   ├── ListForm.vue
 │   ├── ListItem.vue
 │   ├── ListsList.vue
+│   ├── TestFunction.vue
 │   └── UserProfile.vue
 ├── stores/             # Pinia stores
 │   ├── index.ts
@@ -102,6 +126,14 @@ src/
 ├── App.vue             # Root component
 ├── main.ts             # Application entry point
 └── style.css           # Global styles
+
+netlify/
+└── functions/          # Netlify serverless functions
+    └── generate-list-items.ts
+
+public/
+├── _redirects          # Netlify redirects for SPA routing
+└── vite.svg            # Vite logo
 ```
 
 ## Development Guidelines

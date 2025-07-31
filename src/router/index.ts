@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import ListsList from '../components/ListsList.vue';
 import ListDetail from '../components/ListDetail.vue';
 import UserProfile from '../components/UserProfile.vue';
+import TestFunction from '../components/TestFunction.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: UserProfile,
+    },
+    {
+      path: '/test-function',
+      name: 'test-function',
+      component: TestFunction,
     },
   ],
 });
