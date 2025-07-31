@@ -5,7 +5,7 @@ import { useListsStore } from '../stores/lists';
 import { useListItemsStore } from '../stores/listItems';
 
 interface SearchResult {
-  type: 'list' | 'item';
+  type: 'list' | 'item' | 'tag';
   id: string;
   title: string;
   description?: string;
@@ -13,6 +13,7 @@ interface SearchResult {
   listName?: string;
   isComplete?: boolean;
   matchedText: string;
+  tagName?: string;
 }
 
 const router = useRouter();
@@ -68,17 +69,36 @@ const searchResults = computed((): SearchResult[] => {
   const results: SearchResult[] = [];
   const lists = listsStore.getAllLists();
 
+  // Search through tags first
+  const allTags = listsStore.getAllTags();
+  const matchingTags = allTags.filter(tag => tag.toLowerCase().includes(query));
+  
+  matchingTags.forEach(tag => {
+    results.push({
+      type: 'tag',
+      id: `tag-${tag}`,
+      title: `#${tag}`,
+      description: `View all lists with tag "${tag}"`,
+      tagName: tag,
+      matchedText: highlightMatch(`#${tag}`, query)
+    });
+  });
+
   // Search through lists
   lists.forEach(list => {
     const listNameMatch = list.name.toLowerCase().includes(query);
     const listDescMatch = list.description.toLowerCase().includes(query);
+    const tagMatch = list.tags.some(tag => tag.toLowerCase().includes(query));
     
-    if (listNameMatch || listDescMatch) {
+    if (listNameMatch || listDescMatch || tagMatch) {
       let matchedText = '';
       if (listNameMatch) {
         matchedText = highlightMatch(list.name, query);
       } else if (listDescMatch) {
         matchedText = highlightMatch(list.description, query);
+      } else if (tagMatch) {
+        const matchingTag = list.tags.find(tag => tag.toLowerCase().includes(query));
+        matchedText = `${list.name} (${highlightMatch(`#${matchingTag}`, query)})`;
       }
 
       results.push({
@@ -119,8 +139,11 @@ const handleFocus = () => {
 const handleResultClick = (result: SearchResult) => {
   if (result.type === 'list') {
     router.push(`/list/${result.id}`);
-  } else {
+  } else if (result.type === 'item') {
     router.push(`/list/${result.listId}`);
+  } else if (result.type === 'tag') {
+    // Navigate to homepage with tag filter
+    router.push({ path: '/', query: { tag: result.tagName } });
   }
   isSearchOpen.value = false;
   searchQuery.value = '';
@@ -177,12 +200,17 @@ const clearSearch = () => {
           <div class="result-icon">
             <svg v-if="result.type === 'list'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 12l2 2 4-4"></path>
-              <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
-              <path d="M21 19c.552 0 1-.448 1-1v-6c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
+              <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+              <path d="M15 9l-6 6"></path>
+              <path d="M9 9l6 6"></path>
             </svg>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg v-else-if="result.type === 'item'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="9,11 12,14 22,4"></polyline>
               <path d="M21,12v7a2,2 0 0,1 -2,2H5a2,2 0 0,1 -2,-2V5a2,2 0 0,1 2,-2h11"></path>
+            </svg>
+            <svg v-else-if="result.type === 'tag'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
             </svg>
           </div>
           

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useListsStore } from '../stores';
+import TagInput from './TagInput.vue';
 
 const listsStore = useListsStore();
 
@@ -9,6 +10,7 @@ const formData = ref({
   name: '',
   description: '',
   dueDate: '',
+  tags: [] as string[],
 });
 
 const resetForm = () => {
@@ -16,6 +18,7 @@ const resetForm = () => {
     name: '',
     description: '',
     dueDate: '',
+    tags: [],
   };
 };
 
@@ -26,6 +29,7 @@ const createList = () => {
     name: formData.value.name.trim(),
     description: formData.value.description.trim(),
     dueDate: formData.value.dueDate || null,
+    tags: formData.value.tags,
   });
 
   resetForm();
@@ -88,6 +92,14 @@ const toggleForm = () => {
             v-model="formData.dueDate"
             type="date"
             class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <TagInput
+            v-model="formData.tags"
+            label="Tags"
+            placeholder="Add tags like 'work', 'home', 'urgent'..."
           />
         </div>
 
