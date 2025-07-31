@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useListItemsStore, useListsStore } from '../stores';
+import SuggestionModal from './SuggestionModal.vue';
 
 const props = defineProps<{
   listId: string;
@@ -12,6 +13,7 @@ const listsStore = useListsStore();
 const newItemName = ref('');
 const newItemDueDate = ref('');
 const isAdding = ref(false);
+const showAIModal = ref(false);
 
 // Get parent list's due date for default inheritance
 const parentList = computed(() => listsStore.getListById(props.listId));
@@ -54,17 +56,38 @@ const handleKeydown = (event: KeyboardEvent) => {
     isAdding.value = false;
   }
 };
+
+const openAIModal = () => {
+  showAIModal.value = true;
+};
+
+const closeAIModal = () => {
+  showAIModal.value = false;
+};
+
+const handleItemsAdded = (count: number) => {
+  console.log(`Added ${count} AI-generated items`);
+};
 </script>
 
 <template>
   <div class="add-item-container">
-    <button
-      v-if="!isAdding"
-      @click="toggleAddForm"
-      class="btn btn-primary add-item-btn"
-    >
-      + Add New Item
-    </button>
+    <div v-if="!isAdding" class="add-buttons">
+      <button
+        @click="toggleAddForm"
+        class="btn btn-primary add-item-btn"
+      >
+        + Add New Item
+      </button>
+      <button
+        @click="openAIModal"
+        class="btn btn-secondary ai-suggest-btn"
+        title="Get AI suggestions for new items"
+      >
+        <span class="magic-wand">✨</span>
+        Suggest Items
+      </button>
+    </div>
 
     <div v-else class="add-item-form">
       <div class="form-group">
@@ -100,6 +123,14 @@ const handleKeydown = (event: KeyboardEvent) => {
         <button @click="toggleAddForm" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
+
+    <!-- AI Suggestion Modal -->
+    <SuggestionModal
+      :list-id="props.listId"
+      :is-visible="showAIModal"
+      @close="closeAIModal"
+      @items-added="handleItemsAdded"
+    />
   </div>
 </template>
 
@@ -108,10 +139,37 @@ const handleKeydown = (event: KeyboardEvent) => {
   margin-bottom: 2rem;
 }
 
+.add-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .add-item-btn {
-  width: 100%;
+  flex: 1;
   padding: 1rem;
   font-size: 1rem;
+}
+
+.ai-suggest-btn {
+  flex: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.magic-wand {
+  font-size: 1.2em;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  75% { transform: rotate(5deg) scale(1.1); }
 }
 
 .add-item-form {
@@ -191,5 +249,18 @@ const handleKeydown = (event: KeyboardEvent) => {
 .btn-secondary:hover {
   background: #5a6268;
   transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .add-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .add-item-btn,
+  .ai-suggest-btn {
+    width: 100%;
+    flex: none;
+  }
 }
 </style>
