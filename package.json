@@ -16,6 +16,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@netlify/functions": "^4.2.1",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
     "prettier": "3.6.2",
