@@ -54,13 +54,11 @@ export const useListItemsStore = defineStore('listItems', () => {
   };
 
   // Actions
-  const createListItem = (itemData: Omit<ListItem, 'id'>) => {
+  const createListItem = (itemData: Omit<ListItem, 'id' | 'selected'>) => {
     // Validate due date against parent list
     if (itemData.dueDate && !validateDueDate(itemData.listId, itemData.dueDate)) {
       throw new Error('Item due date cannot be later than the parent list due date');
     }
-   
-  const createListItem = (itemData: Omit<ListItem, 'id' | 'selected'>) => {
     const newItem: ListItem = {
       id: uuidv4(),
       selected: false,
