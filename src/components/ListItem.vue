@@ -16,6 +16,14 @@ const toggleComplete = () => {
   listItemsStore.toggleItemComplete(props.item.id);
 };
 
+const toggleSelect = () => {
+  if (props.item.selected) {
+    listItemsStore.deselectItem(props.item.id);
+  } else {
+    listItemsStore.selectItem(props.item.id);
+  }
+};
+
 const startEditing = () => {
   editName.value = props.item.name;
   isEditing.value = true;
@@ -43,14 +51,15 @@ const deleteItem = () => {
 </script>
 
 <template>
-  <div class="list-item" :class="{ completed: item.isComplete }">
+  <div class="list-item" :class="{ completed: item.isComplete, selected: item.selected }">
     <div class="item-content">
-      <div class="item-checkbox">
+      <div class="item-select-checkbox">
         <input
           type="checkbox"
-          :checked="item.isComplete"
-          @change="toggleComplete"
-          class="checkbox"
+          :checked="item.selected"
+          @change="toggleSelect"
+          class="select-checkbox"
+          title="Select item"
         />
       </div>
 
@@ -86,6 +95,9 @@ const deleteItem = () => {
         >
           🗑️
         </button>
+        <div class="item-complete-indicator" @click="toggleComplete" :class="{ 'is-complete': item.isComplete }" title="Toggle completion status">
+          <span v-if="item.isComplete" class="complete-icon">✓</span>
+        </div>
       </div>
     </div>
   </div>
@@ -115,21 +127,53 @@ const deleteItem = () => {
   color: #666;
 }
 
+.list-item.selected {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
 .item-content {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.item-checkbox {
+.item-select-checkbox {
   flex-shrink: 0;
 }
 
-.checkbox {
+.select-checkbox {
   width: 1.2rem;
   height: 1.2rem;
   cursor: pointer;
   accent-color: #667eea;
+}
+
+.item-complete-indicator {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.item-complete-indicator:hover {
+  border-color: #667eea;
+}
+
+.item-complete-indicator.is-complete {
+  background-color: #667eea;
+  border-color: #667eea;
+}
+
+.complete-icon {
+  color: white;
+  font-weight: bold;
 }
 
 .item-text {
