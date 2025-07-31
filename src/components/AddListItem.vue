@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useListItemsStore } from '../stores';
+import { ref, computed } from 'vue';
+import { useListItemsStore, useListsStore } from '../stores';
 
 const props = defineProps<{
   listId: string;
 }>();
 
 const listItemsStore = useListItemsStore();
+const listsStore = useListsStore();
 
 const newItemName = ref('');
+const newItemDueDate = ref('');
 const isAdding = ref(false);
+
+// Get parent list's due date for default inheritance
+const parentList = computed(() => listsStore.getListById(props.listId));
+const parentDueDate = computed(() => parentList.value?.dueDate || null);
 
 const addItem = () => {
   if (!newItemName.value.trim()) return;
@@ -18,15 +24,19 @@ const addItem = () => {
     listId: props.listId,
     name: newItemName.value.trim(),
     isComplete: false,
+    dueDate: newItemDueDate.value || null,
   });
 
   newItemName.value = '';
+  newItemDueDate.value = '';
   isAdding.value = false;
 };
 
 const toggleAddForm = () => {
   isAdding.value = !isAdding.value;
   if (isAdding.value) {
+    // Set default due date to parent list's due date
+    newItemDueDate.value = parentDueDate.value || '';
     // Focus the input after a brief delay to ensure it's rendered
     setTimeout(() => {
       const input = document.getElementById('newItemInput');
@@ -40,6 +50,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     addItem();
   } else if (event.key === 'Escape') {
     newItemName.value = '';
+    newItemDueDate.value = '';
     isAdding.value = false;
   }
 };
@@ -57,6 +68,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
     <div v-else class="add-item-form">
       <div class="form-group">
+        <label for="newItemInput" class="form-label">Item Name</label>
         <input
           id="newItemInput"
           v-model="newItemName"
@@ -66,6 +78,21 @@ const handleKeydown = (event: KeyboardEvent) => {
           placeholder="Enter item name..."
           class="item-input"
         />
+      </div>
+
+      <div class="form-group">
+        <label for="newItemDueDate" class="form-label">Due Date</label>
+        <input
+          id="newItemDueDate"
+          v-model="newItemDueDate"
+          type="date"
+          class="item-input"
+          :max="parentDueDate || undefined"
+        />
+        <small v-if="parentDueDate" class="form-hint">
+          Inherited from list ({{ parentDueDate }}). Cannot be later than list
+          due date.
+        </small>
       </div>
 
       <div class="form-actions">
@@ -97,6 +124,22 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 .form-group {
   margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
 }
 
 .item-input {

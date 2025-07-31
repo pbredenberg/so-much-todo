@@ -6,6 +6,7 @@ interface GeneratedItem {
   listId: string;
   name: string;
   isComplete: boolean;
+  dueDate: string | null;
 }
 
 interface FunctionResponse {
@@ -16,6 +17,20 @@ interface FunctionResponse {
 const isLoading = ref(false);
 const result = ref<FunctionResponse | null>(null);
 const error = ref<string | null>(null);
+
+// Helper functions for due date formatting and overdue detection
+const formatDueDate = (dateStr: string | null) => {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+
 
 const testFunction = async () => {
   isLoading.value = true;
@@ -80,9 +95,14 @@ const testFunction = async () => {
             <span class="item-name" :class="{ completed: item.isComplete }">
               {{ item.name }}
             </span>
-            <span class="item-status">
-              {{ item.isComplete ? '✅ Complete' : '⏳ Pending' }}
-            </span>
+            <div class="item-info">
+              <span class="item-status">
+                {{ item.isComplete ? '✅ Complete' : '⏳ Pending' }}
+              </span>
+              <span v-if="item.dueDate" class="item-due-date">
+                📅 {{ formatDueDate(item.dueDate) }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -188,7 +208,18 @@ const testFunction = async () => {
   color: var(--text-muted);
 }
 
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .item-status {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.item-due-date {
   font-size: 0.875rem;
   color: var(--text-secondary);
 }

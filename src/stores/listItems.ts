@@ -1,12 +1,14 @@
-import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { defineStore } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
+import { useListsStore } from './lists';
 
 export interface ListItem {
   id: string;
   listId: string;
   name: string;
   isComplete: boolean;
+  dueDate: string | null;
   selected: boolean;
 }
 
@@ -39,8 +41,24 @@ export const useListItemsStore = defineStore('listItems', () => {
     }
   };
 
+  // Validation helper
+  const validateDueDate = (listId: string, dueDate: string | null): boolean => {
+    if (!dueDate) return true; // No due date is always valid
+    
+    const listsStore = useListsStore();
+    const parentList = listsStore.getListById(listId);
+    
+    if (!parentList?.dueDate) return true; // No parent due date constraint
+    
+    return new Date(dueDate) <= new Date(parentList.dueDate);
+  };
+
   // Actions
   const createListItem = (itemData: Omit<ListItem, 'id' | 'selected'>) => {
+    // Validate due date against parent list
+    if (itemData.dueDate && !validateDueDate(itemData.listId, itemData.dueDate)) {
+      throw new Error('Item due date cannot be later than the parent list due date');
+    }
     const newItem: ListItem = {
       id: uuidv4(),
       selected: false,
@@ -57,7 +75,14 @@ export const useListItemsStore = defineStore('listItems', () => {
   ) => {
     const index = listItems.value.findIndex((item) => item.id === id);
     if (index !== -1) {
-      listItems.value[index] = { ...listItems.value[index], ...updates };
+      const currentItem = listItems.value[index];
+      
+      // Validate due date if it's being updated
+      if (updates.dueDate !== undefined && !validateDueDate(currentItem.listId, updates.dueDate)) {
+        throw new Error('Item due date cannot be later than the parent list due date');
+      }
+      
+      listItems.value[index] = { ...currentItem, ...updates };
       saveToStorage();
       return listItems.value[index];
     }

@@ -10,6 +10,7 @@ interface GeneratedItem {
   listId: string;
   name: string;
   isComplete: boolean;
+  dueDate: string | null;
 }
 
 interface GenerateItemsResponse {
@@ -64,11 +65,17 @@ export const handler: Handler = async (event, context) => {
     const shuffledItems = [...sampleItems].sort(() => Math.random() - 0.5);
 
     for (let i = 0; i < Math.min(count, shuffledItems.length); i++) {
+      // Generate a random due date between 1-30 days from now
+      const daysFromNow = Math.floor(Math.random() * 30) + 1;
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + daysFromNow);
+
       generatedItems.push({
         id: generateUUID(),
         listId: listId,
         name: shuffledItems[i],
         isComplete: Math.random() > 0.7, // 30% chance of being complete
+        dueDate: dueDate.toISOString().split('T')[0], // ISO date format (YYYY-MM-DD)
       });
     }
 
