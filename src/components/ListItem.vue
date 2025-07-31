@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useListItemsStore } from '../stores';
 import type { ListItem } from '../stores';
 
@@ -41,10 +41,42 @@ const deleteItem = () => {
     listItemsStore.deleteListItem(props.item.id);
   }
 };
+
+const handleStartEditItem = (event: CustomEvent): void => {
+  const { itemId } = event.detail;
+  if (itemId === props.item.id) {
+    startEditing();
+  }
+};
+
+const handleCancelAction = (): void => {
+  if (isEditing.value) {
+    cancelEdit();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener(
+    'start-edit-item',
+    handleStartEditItem as EventListener
+  );
+  document.addEventListener('cancel-action-trigger', handleCancelAction);
+});
+
+onUnmounted(() => {
+  document.removeEventListener(
+    'start-edit-item',
+    handleStartEditItem as EventListener
+  );
+  document.removeEventListener('cancel-action-trigger', handleCancelAction);
+});
 </script>
 
 <template>
-  <div class="list-item" :class="{ completed: item.isComplete, selected: isSelected }">
+  <div
+    class="list-item"
+    :class="{ completed: item.isComplete, selected: isSelected }"
+  >
     <div class="item-content">
       <div class="item-checkbox">
         <input

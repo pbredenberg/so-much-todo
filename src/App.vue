@@ -1,5 +1,136 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
+import { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const { registerShortcut } = useKeyboardShortcuts();
+
+// Global keyboard shortcuts
+const setupGlobalShortcuts = (): void => {
+  // Create List shortcut (Ctrl/Cmd + Shift + N) - works on home page
+  registerShortcut({
+    shortcut: { key: 'n', ctrlKey: true, metaKey: true, shiftKey: true },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'home') {
+        // Trigger list form opening
+        const event = new CustomEvent('open-list-form');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'home',
+    description: 'Create new list'
+  });
+
+  // Add Item shortcut (Ctrl/Cmd + Shift + A) - works on list detail page
+  registerShortcut({
+    shortcut: { key: 'a', ctrlKey: true, metaKey: true, shiftKey: true },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        // Trigger add item form opening
+        const event = new CustomEvent('open-add-item-form');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Add new item'
+  });
+
+  // Delete List shortcut (Ctrl/Cmd + Shift + D) - works on list detail page
+  registerShortcut({
+    shortcut: { key: 'd', ctrlKey: true, metaKey: true, shiftKey: true },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        // Trigger list deletion
+        const event = new CustomEvent('delete-current-list');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Delete current list'
+  });
+
+  // Item navigation and actions (Arrow keys, Enter, Ctrl+Enter)
+  registerShortcut({
+    shortcut: { key: 'ArrowDown' },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        const event = new CustomEvent('select-next-item');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Select next item'
+  });
+
+  registerShortcut({
+    shortcut: { key: 'ArrowUp' },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        const event = new CustomEvent('select-previous-item');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Select previous item'
+  });
+
+  registerShortcut({
+    shortcut: { key: 'Enter' },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        const event = new CustomEvent('edit-selected-item');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Edit selected item'
+  });
+
+  registerShortcut({
+    shortcut: { key: 'F2' },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        const event = new CustomEvent('edit-selected-item');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Edit selected item (F2)'
+  });
+
+  registerShortcut({
+    shortcut: { key: 'Enter', ctrlKey: true, metaKey: true },
+    handler: () => {
+      const currentRoute = route.name as string;
+      if (currentRoute === 'list-detail') {
+        const event = new CustomEvent('complete-selected-item');
+        document.dispatchEvent(event);
+      }
+    },
+    context: 'list-detail',
+    description: 'Complete selected item'
+  });
+
+  registerShortcut({
+    shortcut: { key: 'Escape' },
+    handler: () => {
+      const event = new CustomEvent('cancel-current-action');
+      document.dispatchEvent(event);
+    },
+    description: 'Cancel current action'
+  });
+};
+
+// Initialize shortcuts
+setupGlobalShortcuts();
 </script>
 
 <template>

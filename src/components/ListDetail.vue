@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useListsStore, useListItemsStore } from '../stores';
 import ListItem from './ListItem.vue';
@@ -87,10 +87,74 @@ const getSelectedItem = () => {
   return null;
 };
 
+const handleSelectNextItem = (): void => {
+  selectNextItem();
+};
+
+const handleSelectPreviousItem = (): void => {
+  selectPreviousItem();
+};
+
+const handleEditSelectedItem = (): void => {
+  const selectedItem = getSelectedItem();
+  if (selectedItem) {
+    // Find the item component and trigger edit mode
+    const event = new CustomEvent('start-edit-item', {
+      detail: { itemId: selectedItem.id }
+    });
+    document.dispatchEvent(event);
+  }
+};
+
+const handleCompleteSelectedItem = (): void => {
+  const selectedItem = getSelectedItem();
+  if (selectedItem) {
+    listItemsStore.toggleItemComplete(selectedItem.id);
+  }
+};
+
+const handleDeleteCurrentList = (): void => {
+  deleteList();
+};
+
+const handleOpenAddItemForm = (): void => {
+  // Trigger the add item form to open
+  const event = new CustomEvent('open-add-item-form-trigger');
+  document.dispatchEvent(event);
+};
+
+const handleCancelCurrentAction = (): void => {
+  // Clear selection and cancel any ongoing actions
+  clearSelection();
+  const event = new CustomEvent('cancel-action-trigger');
+  document.dispatchEvent(event);
+};
+
 onMounted(() => {
   if (!list.value) {
     router.push('/');
+    return;
   }
+
+  // Add event listeners for keyboard shortcuts
+  document.addEventListener('select-next-item', handleSelectNextItem);
+  document.addEventListener('select-previous-item', handleSelectPreviousItem);
+  document.addEventListener('edit-selected-item', handleEditSelectedItem);
+  document.addEventListener('complete-selected-item', handleCompleteSelectedItem);
+  document.addEventListener('delete-current-list', handleDeleteCurrentList);
+  document.addEventListener('open-add-item-form', handleOpenAddItemForm);
+  document.addEventListener('cancel-current-action', handleCancelCurrentAction);
+});
+
+onUnmounted(() => {
+  // Clean up event listeners
+  document.removeEventListener('select-next-item', handleSelectNextItem);
+  document.removeEventListener('select-previous-item', handleSelectPreviousItem);
+  document.removeEventListener('edit-selected-item', handleEditSelectedItem);
+  document.removeEventListener('complete-selected-item', handleCompleteSelectedItem);
+  document.removeEventListener('delete-current-list', handleDeleteCurrentList);
+  document.removeEventListener('open-add-item-form', handleOpenAddItemForm);
+  document.removeEventListener('cancel-current-action', handleCancelCurrentAction);
 });
 
 // Export methods for keyboard shortcuts (Phase 2)

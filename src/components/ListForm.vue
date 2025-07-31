@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useListsStore } from '../stores';
 
 const listsStore = useListsStore();
@@ -38,6 +38,36 @@ const toggleForm = () => {
     resetForm();
   }
 };
+
+const handleOpenListForm = (): void => {
+  if (!showForm.value) {
+    showForm.value = true;
+    // Focus the name input after a brief delay
+    setTimeout(() => {
+      const input = document.getElementById('listName');
+      if (input) {
+        input.focus();
+      }
+    }, 100);
+  }
+};
+
+const handleCancelAction = (): void => {
+  if (showForm.value) {
+    showForm.value = false;
+    resetForm();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('open-list-form', handleOpenListForm);
+  document.addEventListener('cancel-current-action', handleCancelAction);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('open-list-form', handleOpenListForm);
+  document.removeEventListener('cancel-current-action', handleCancelAction);
+});
 </script>
 
 <template>

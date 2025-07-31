@@ -51,7 +51,7 @@ export const useKeyboardShortcuts = () => {
 
 | Action | Shortcut | Context | Implementation |
 |--------|----------|---------|----------------|
-| Add Item | `Ctrl/Cmd + N` | List Detail page | Focus AddListItem input |
+| Add Item | `Ctrl/Cmd + Shift + A` | List Detail page | Focus AddListItem input |
 | Create List | `Ctrl/Cmd + Shift + N` | Home page | Open ListForm |
 | Complete Item | `Ctrl/Cmd + Enter` | List Detail (with item selected) | Toggle selected item |
 | Edit Item | `Enter` or `F2` | List Detail (with item selected) | Enter edit mode |
@@ -72,19 +72,19 @@ export const useKeyboardShortcuts = () => {
    - Visual indicators for selected items
    - Keyboard navigation between items
 
-### Phase 2: Shortcut Implementation
-1. **Global Shortcuts in App.vue**
+### Phase 2: Shortcut Implementation ✅
+1. **Global Shortcuts in App.vue** ✅
    - Import and use keyboard shortcuts composable
    - Handle route-independent shortcuts
 
-2. **List Detail Shortcuts**
+2. **List Detail Shortcuts** ✅
    - Item navigation (arrow keys)
    - Add item (Ctrl/Cmd + N)
    - Complete item (Ctrl/Cmd + Enter)
    - Edit item (Enter/F2)
    - Delete list (Ctrl/Cmd + Shift + D)
 
-3. **Home Page Shortcuts**
+3. **Home Page Shortcuts** ✅
    - Create list (Ctrl/Cmd + Shift + N)
 
 ### Phase 3: Enhanced UX

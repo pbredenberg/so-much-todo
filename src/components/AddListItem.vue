@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useListItemsStore } from '../stores';
 
 const props = defineProps<{
@@ -43,6 +43,39 @@ const handleKeydown = (event: KeyboardEvent) => {
     isAdding.value = false;
   }
 };
+
+const handleOpenAddItemForm = (): void => {
+  // Always open the form (don't toggle if already open)
+  if (!isAdding.value) {
+    isAdding.value = true;
+    // Focus the input after a brief delay to ensure it's rendered
+    setTimeout(() => {
+      const input = document.getElementById('newItemInput');
+      if (input) {
+        input.focus();
+      }
+    }, 100);
+  }
+};
+
+const handleCancelAction = (): void => {
+  if (isAdding.value) {
+    newItemName.value = '';
+    isAdding.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('open-add-item-form', handleOpenAddItemForm);
+  document.addEventListener('open-add-item-form-trigger', handleOpenAddItemForm);
+  document.addEventListener('cancel-action-trigger', handleCancelAction);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('open-add-item-form', handleOpenAddItemForm);
+  document.removeEventListener('open-add-item-form-trigger', handleOpenAddItemForm);
+  document.removeEventListener('cancel-action-trigger', handleCancelAction);
+});
 </script>
 
 <template>
