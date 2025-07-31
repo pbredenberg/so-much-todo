@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
+import SearchBar from './components/SearchBar.vue';
 </script>
 
 <template>
@@ -8,6 +9,7 @@ import { RouterView } from 'vue-router';
       <div class="container">
         <div class="header-content">
           <h1>So Much Todo</h1>
+          <SearchBar />
           <nav class="header-nav">
             <RouterLink to="/" class="nav-link">Home</RouterLink>
             <RouterLink to="/profile" class="nav-link">Profile</RouterLink>
@@ -42,6 +44,7 @@ import { RouterView } from 'vue-router';
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
 }
 
 .app-header h1 {
@@ -95,6 +98,12 @@ import { RouterView } from 'vue-router';
 
   .app-main {
     padding: 1rem 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .header-content {
+    gap: 1.5rem;
   }
 }
 </style>
