@@ -7,6 +7,7 @@ export interface ListItem {
   listId: string;
   name: string;
   isComplete: boolean;
+  dueDate: string | null;
 }
 
 export const useListItemsStore = defineStore('listItems', () => {
