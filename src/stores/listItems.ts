@@ -9,6 +9,7 @@ export interface ListItem {
   name: string;
   isComplete: boolean;
   dueDate: string | null;
+  selected: boolean;
 }
 
 export const useListItemsStore = defineStore('listItems', () => {
@@ -58,9 +59,11 @@ export const useListItemsStore = defineStore('listItems', () => {
     if (itemData.dueDate && !validateDueDate(itemData.listId, itemData.dueDate)) {
       throw new Error('Item due date cannot be later than the parent list due date');
     }
-    
+   
+  const createListItem = (itemData: Omit<ListItem, 'id' | 'selected'>) => {
     const newItem: ListItem = {
       id: uuidv4(),
+      selected: false,
       ...itemData,
     };
     listItems.value.push(newItem);
@@ -131,6 +134,82 @@ export const useListItemsStore = defineStore('listItems', () => {
     saveToStorage();
   };
 
+  // Selection methods
+  const selectItem = (id: string) => {
+    const index = listItems.value.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      listItems.value[index].selected = true;
+      saveToStorage();
+      return listItems.value[index];
+    }
+    return null;
+  };
+
+  const deselectItem = (id: string) => {
+    const index = listItems.value.findIndex((item) => item.id === id);
+    if (index !== -1) {
+      listItems.value[index].selected = false;
+      saveToStorage();
+      return listItems.value[index];
+    }
+    return null;
+  };
+
+  const selectAllItems = (listId: string) => {
+    let changed = false;
+    listItems.value.forEach((item, index) => {
+      if (item.listId === listId && !item.selected) {
+        listItems.value[index].selected = true;
+        changed = true;
+      }
+    });
+    if (changed) {
+      saveToStorage();
+    }
+    return getItemsByListId(listId);
+  };
+
+  const deselectAllItems = (listId: string) => {
+    let changed = false;
+    listItems.value.forEach((item, index) => {
+      if (item.listId === listId && item.selected) {
+        listItems.value[index].selected = false;
+        changed = true;
+      }
+    });
+    if (changed) {
+      saveToStorage();
+    }
+    return getItemsByListId(listId);
+  };
+
+  // Bulk operations
+  const bulkDeleteItems = (listId: string) => {
+    const initialLength = listItems.value.length;
+    listItems.value = listItems.value.filter(
+      (item) => !(item.listId === listId && item.selected)
+    );
+    if (listItems.value.length !== initialLength) {
+      saveToStorage();
+      return true;
+    }
+    return false;
+  };
+
+  const bulkSetItemsComplete = (listId: string, complete: boolean) => {
+    let changed = false;
+    listItems.value.forEach((item, index) => {
+      if (item.listId === listId && item.selected && item.isComplete !== complete) {
+        listItems.value[index].isComplete = complete;
+        changed = true;
+      }
+    });
+    if (changed) {
+      saveToStorage();
+    }
+    return getItemsByListId(listId).filter(item => item.selected);
+  };
+
   // Initialize store
   loadFromStorage();
 
@@ -144,5 +223,12 @@ export const useListItemsStore = defineStore('listItems', () => {
     getItemById,
     deleteItemsByListId,
     clearAllItems,
+    selectItem,
+    deselectItem,
+    selectAllItems,
+    deselectAllItems,
+    bulkDeleteItems,
+    bulkSetItemsComplete: (listId: string) => bulkSetItemsComplete(listId, true),
+    bulkSetItemsIncomplete: (listId: string) => bulkSetItemsComplete(listId, false),
   };
 });

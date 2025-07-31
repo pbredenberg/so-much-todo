@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useListsStore, useListItemsStore } from '../stores';
 import ListItem from './ListItem.vue';
@@ -14,6 +14,8 @@ const listId = route.params.id as string;
 
 const list = computed(() => listsStore.getListById(listId));
 const items = computed(() => listItemsStore.getItemsByListId(listId));
+const selectedItems = computed(() => items.value.filter(item => item.selected));
+const isLoading = ref(false);
 
 const navigateBack = () => {
   router.push('/');
@@ -31,6 +33,55 @@ const deleteList = () => {
     listsStore.deleteList(listId);
     router.push('/');
   }
+};
+
+// Bulk action methods
+const selectAll = () => {
+  isLoading.value = true;
+  listItemsStore.selectAllItems(listId);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 300);
+};
+
+const deselectAll = () => {
+  isLoading.value = true;
+  listItemsStore.deselectAllItems(listId);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 300);
+};
+
+const bulkDelete = () => {
+  if (selectedItems.value.length === 0) return;
+  
+  if (confirm(`Are you sure you want to delete ${selectedItems.value.length} selected item(s)?`)) {
+    isLoading.value = true;
+    listItemsStore.bulkDeleteItems(listId);
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 300);
+  }
+};
+
+const bulkSetComplete = () => {
+  if (selectedItems.value.length === 0) return;
+  
+  isLoading.value = true;
+  listItemsStore.bulkSetItemsComplete(listId);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 300);
+};
+
+const bulkSetIncomplete = () => {
+  if (selectedItems.value.length === 0) return;
+  
+  isLoading.value = true;
+  listItemsStore.bulkSetItemsIncomplete(listId);
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 300);
 };
 
 onMounted(() => {
@@ -64,7 +115,35 @@ onMounted(() => {
     <AddListItem :listId="listId" />
 
     <div class="items-section">
-      <h3>Items ({{ items.length }})</h3>
+      <div class="items-header">
+        <h3>Items ({{ items.length }})</h3>
+        
+        <div class="bulk-actions" v-if="items.length > 0">
+          <div class="selection-actions">
+            <button @click="selectAll" class="btn btn-sm btn-secondary" :disabled="isLoading">
+              Select All
+            </button>
+            <button @click="deselectAll" class="btn btn-sm btn-secondary" :disabled="isLoading || selectedItems.length === 0">
+              Deselect All
+            </button>
+            <span v-if="selectedItems.length > 0" class="selected-count">
+              {{ selectedItems.length }} selected
+            </span>
+          </div>
+          
+          <div v-if="selectedItems.length > 0" class="bulk-operations">
+            <button @click="bulkSetComplete" class="btn btn-sm btn-primary" :disabled="isLoading">
+              Mark Done
+            </button>
+            <button @click="bulkSetIncomplete" class="btn btn-sm btn-primary" :disabled="isLoading">
+              Mark Undone
+            </button>
+            <button @click="bulkDelete" class="btn btn-sm btn-danger" :disabled="isLoading">
+              Delete Selected
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div v-if="items.length > 0" class="items-list">
         <ListItem v-for="item in items" :key="item.id" :item="item" />
@@ -141,9 +220,69 @@ onMounted(() => {
 }
 
 .items-section h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0;
   color: #333;
   font-size: 1.5rem;
+}
+
+.items-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .items-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.bulk-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .bulk-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bulk-operations {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.selected-count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #667eea;
+  padding: 0.25rem 0.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 4px;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
 }
 
 .items-list {
@@ -158,11 +297,6 @@ onMounted(() => {
   color: #666;
 }
 
-.empty-items p {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -171,6 +305,21 @@ onMounted(() => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
