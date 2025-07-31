@@ -1,6 +1,6 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
-import { v4 as uuidv4 } from "uuid";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface ListItem {
   id: string;
@@ -9,20 +9,20 @@ export interface ListItem {
   isComplete: boolean;
 }
 
-export const useListItemsStore = defineStore("listItems", () => {
+export const useListItemsStore = defineStore('listItems', () => {
   // State
   const listItems = ref<ListItem[]>([]);
 
   // Load from localStorage on store initialization
   const loadFromStorage = () => {
-    const stored = localStorage.getItem("list-items-store");
+    const stored = localStorage.getItem('list-items-store');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         listItems.value = parsed;
       } catch (error) {
         console.error(
-          "Failed to load list items data from localStorage:",
+          'Failed to load list items data from localStorage:',
           error
         );
       }
@@ -32,14 +32,14 @@ export const useListItemsStore = defineStore("listItems", () => {
   // Save to localStorage
   const saveToStorage = () => {
     try {
-      localStorage.setItem("list-items-store", JSON.stringify(listItems.value));
+      localStorage.setItem('list-items-store', JSON.stringify(listItems.value));
     } catch (error) {
-      console.error("Failed to save list items data to localStorage:", error);
+      console.error('Failed to save list items data to localStorage:', error);
     }
   };
 
   // Actions
-  const createListItem = (itemData: Omit<ListItem, "id">) => {
+  const createListItem = (itemData: Omit<ListItem, 'id'>) => {
     const newItem: ListItem = {
       id: uuidv4(),
       ...itemData,
@@ -51,7 +51,7 @@ export const useListItemsStore = defineStore("listItems", () => {
 
   const updateListItem = (
     id: string,
-    updates: Partial<Omit<ListItem, "id">>
+    updates: Partial<Omit<ListItem, 'id'>>
   ) => {
     const index = listItems.value.findIndex((item) => item.id === id);
     if (index !== -1) {

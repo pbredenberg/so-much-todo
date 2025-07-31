@@ -1,6 +1,6 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
-import { v4 as uuidv4 } from "uuid";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface List {
   id: string;
@@ -9,19 +9,19 @@ export interface List {
   dueDate: string | null;
 }
 
-export const useListsStore = defineStore("lists", () => {
+export const useListsStore = defineStore('lists', () => {
   // State
   const lists = ref<List[]>([]);
 
   // Load from localStorage on store initialization
   const loadFromStorage = () => {
-    const stored = localStorage.getItem("lists-store");
+    const stored = localStorage.getItem('lists-store');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         lists.value = parsed;
       } catch (error) {
-        console.error("Failed to load lists data from localStorage:", error);
+        console.error('Failed to load lists data from localStorage:', error);
       }
     }
   };
@@ -29,14 +29,14 @@ export const useListsStore = defineStore("lists", () => {
   // Save to localStorage
   const saveToStorage = () => {
     try {
-      localStorage.setItem("lists-store", JSON.stringify(lists.value));
+      localStorage.setItem('lists-store', JSON.stringify(lists.value));
     } catch (error) {
-      console.error("Failed to save lists data to localStorage:", error);
+      console.error('Failed to save lists data to localStorage:', error);
     }
   };
 
   // Actions
-  const createList = (listData: Omit<List, "id">) => {
+  const createList = (listData: Omit<List, 'id'>) => {
     const newList: List = {
       id: uuidv4(),
       ...listData,
@@ -46,7 +46,7 @@ export const useListsStore = defineStore("lists", () => {
     return newList;
   };
 
-  const updateList = (id: string, updates: Partial<Omit<List, "id">>) => {
+  const updateList = (id: string, updates: Partial<Omit<List, 'id'>>) => {
     const index = lists.value.findIndex((list) => list.id === id);
     if (index !== -1) {
       lists.value[index] = { ...lists.value[index], ...updates };
