@@ -69,7 +69,7 @@ export const handler: Handler = async (event, context) => {
       const daysFromNow = Math.floor(Math.random() * 30) + 1;
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + daysFromNow);
-      
+
       generatedItems.push({
         id: generateUUID(),
         listId: listId,
