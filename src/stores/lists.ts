@@ -7,6 +7,7 @@ export interface List {
   name: string;
   description: string;
   dueDate: string | null;
+  tags: string[];
 }
 
 export const useListsStore = defineStore('lists', () => {
@@ -40,6 +41,7 @@ export const useListsStore = defineStore('lists', () => {
     const newList: List = {
       id: uuidv4(),
       ...listData,
+      tags: listData.tags || [], // Use provided tags or empty array
     };
     lists.value.push(newList);
     saveToStorage();
@@ -79,6 +81,42 @@ export const useListsStore = defineStore('lists', () => {
     saveToStorage();
   };
 
+  // Tag management functions
+  const addTagToList = (listId: string, tag: string) => {
+    const list = lists.value.find(l => l.id === listId);
+    if (list && !list.tags.includes(tag)) {
+      list.tags.push(tag);
+      saveToStorage();
+      return true;
+    }
+    return false;
+  };
+
+  const removeTagFromList = (listId: string, tag: string) => {
+    const list = lists.value.find(l => l.id === listId);
+    if (list) {
+      const index = list.tags.indexOf(tag);
+      if (index > -1) {
+        list.tags.splice(index, 1);
+        saveToStorage();
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const getAllTags = () => {
+    const allTags = new Set<string>();
+    lists.value.forEach(list => {
+      list.tags.forEach(tag => allTags.add(tag));
+    });
+    return Array.from(allTags).sort();
+  };
+
+  const getListsByTag = (tag: string) => {
+    return lists.value.filter(list => list.tags.includes(tag));
+  };
+
   // Initialize store
   loadFromStorage();
 
@@ -90,5 +128,9 @@ export const useListsStore = defineStore('lists', () => {
     getListById,
     getAllLists,
     clearAllLists,
+    addTagToList,
+    removeTagFromList,
+    getAllTags,
+    getListsByTag,
   };
 });
