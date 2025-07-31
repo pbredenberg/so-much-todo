@@ -12,20 +12,14 @@ const lists = computed(() => listsStore.getAllLists());
 const navigateToList = (listId: string) => {
   router.push(`/list/${listId}`);
 };
-
-const navigateToProfile = () => {
-  router.push('/profile');
-};
 </script>
 
 <template>
   <div class="lists-container">
-    <div class="lists-header">
-      <h2>My Todo Lists</h2>
-      <div class="header-actions">
-        <button @click="navigateToProfile" class="btn btn-secondary">
-          Profile
-        </button>
+    <div class="page-header">
+      <div class="page-header-content">
+        <h2>My Todo Lists</h2>
+        <div class="header-actions"></div>
       </div>
     </div>
 
@@ -41,17 +35,23 @@ const navigateToProfile = () => {
         <div class="list-card-header">
           <h3>{{ list.name }}</h3>
           <span v-if="list.dueDate" class="due-date">
-            Due: {{ new Date(list.dueDate).toLocaleDateString() }}
+            📅 {{ new Date(list.dueDate).toLocaleDateString() }}
           </span>
         </div>
-        <p class="list-description">{{ list.description }}</p>
+        <p v-if="list.description" class="list-description">
+          {{ list.description }}
+        </p>
         <div class="list-card-footer">
-          <span class="list-id">ID: {{ list.id.slice(0, 8) }}...</span>
+          <span class="list-id">#{{ list.id.slice(0, 8) }}</span>
+          <span class="list-actions">
+            <span class="action-icon">📝</span>
+          </span>
         </div>
       </div>
     </div>
 
     <div v-else class="empty-state">
+      <div class="empty-icon">📋</div>
       <h3>No lists yet</h3>
       <p>Create your first todo list above!</p>
     </div>
@@ -64,18 +64,23 @@ const navigateToProfile = () => {
   margin: 0 auto;
 }
 
-.lists-header {
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.page-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e1e5e9;
 }
 
-.lists-header h2 {
+.page-header-content h2 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .header-actions {
@@ -85,25 +90,43 @@ const navigateToProfile = () => {
 
 .lists-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
 
 .list-card {
-  background: white;
-  border-radius: 8px;
+  background: var(--white);
+  border-radius: var(--border-radius);
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: var(--transition);
   border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.list-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: var(--transition);
 }
 
 .list-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.list-card:hover::before {
+  opacity: 1;
 }
 
 .list-card-header {
@@ -115,22 +138,28 @@ const navigateToProfile = () => {
 
 .list-card-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--text-primary);
   font-size: 1.25rem;
+  font-weight: 600;
+  flex: 1;
+  margin-right: 1rem;
 }
 
 .due-date {
   font-size: 0.875rem;
-  color: #666;
-  background: #f8f9fa;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  color: var(--text-secondary);
+  background: var(--light-bg);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .list-description {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0 0 1rem 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .list-card-footer {
@@ -138,48 +167,70 @@ const navigateToProfile = () => {
   justify-content: space-between;
   align-items: center;
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-muted);
 }
 
 .list-id {
-  font-family: monospace;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.action-icon {
+  font-size: 1rem;
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.list-card:hover .action-icon {
+  opacity: 1;
 }
 
 .empty-state {
   text-align: center;
-  padding: 3rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 4rem 2rem;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  margin-top: 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
 .empty-state h3 {
-  color: #333;
-  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
+  font-size: 1.1rem;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+@media (max-width: 768px) {
+  .page-header-content {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
+  .page-header-content h2 {
+    font-size: 1.5rem;
+  }
 
-.btn-secondary:hover {
-  background: #5a6268;
-  transform: translateY(-1px);
+  .lists-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .list-card {
+    padding: 1rem;
+  }
 }
 </style>

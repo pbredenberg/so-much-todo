@@ -47,11 +47,15 @@ const toggleForm = () => {
       @click="toggleForm"
       class="btn btn-primary add-list-btn"
     >
-      + Create New List
+      <span>➕</span>
+      Create New List
     </button>
 
     <div v-else class="list-form">
-      <h3>Create New List</h3>
+      <div class="form-header">
+        <h3>Create New List</h3>
+        <button @click="toggleForm" class="close-btn" title="Close">✕</button>
+      </div>
 
       <form @submit.prevent="createList" class="form">
         <div class="form-group">
@@ -61,6 +65,7 @@ const toggleForm = () => {
             v-model="formData.name"
             type="text"
             placeholder="Enter list name"
+            class="form-control"
             required
           />
         </div>
@@ -71,17 +76,26 @@ const toggleForm = () => {
             id="listDescription"
             v-model="formData.description"
             placeholder="Enter list description"
+            class="form-control"
             rows="3"
           ></textarea>
         </div>
 
         <div class="form-group">
           <label for="listDueDate">Due Date</label>
-          <input id="listDueDate" v-model="formData.dueDate" type="date" />
+          <input
+            id="listDueDate"
+            v-model="formData.dueDate"
+            type="date"
+            class="form-control"
+          />
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Create List</button>
+          <button type="submit" class="btn btn-primary">
+            <span>✅</span>
+            Create List
+          </button>
           <button type="button" @click="toggleForm" class="btn btn-secondary">
             Cancel
           </button>
@@ -98,21 +112,69 @@ const toggleForm = () => {
 
 .add-list-btn {
   width: 100%;
-  padding: 1rem;
+  padding: 1.5rem;
   font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.add-list-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .list-form {
-  background: white;
-  border-radius: 8px;
+  background: var(--white);
+  border-radius: var(--border-radius);
   padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border: 2px solid #e1e5e9;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--border-color);
+  animation: slideDown 0.3s ease-out;
 }
 
-.list-form h3 {
-  margin: 0 0 1.5rem 0;
-  color: #333;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.form-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+}
+
+.close-btn:hover {
+  color: var(--text-primary);
+  background: var(--light-bg);
 }
 
 .form {
@@ -121,71 +183,24 @@ const toggleForm = () => {
   gap: 1.5rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #555;
-}
-
-.form-group input,
-.form-group textarea {
-  padding: 0.75rem;
-  border: 2px solid #e1e5e9;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-  font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
 .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  margin-top: 1rem;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+@media (max-width: 768px) {
+  .list-form {
+    padding: 1.5rem;
+  }
 
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
+  .form-actions {
+    flex-direction: column;
+  }
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-  transform: translateY(-1px);
+  .form-actions .btn {
+    width: 100%;
+  }
 }
 </style>
